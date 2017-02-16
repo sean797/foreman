@@ -6,7 +6,7 @@ module Foreman::Controller::Parameters::SmartProxy
     def smart_proxy_params_filter
       Foreman::ParameterFilter.new(::SmartProxy).tap do |filter|
         filter.permit :name,
-          :url
+          {:urls_attributes => [:url, :_destroy, :id, :primary]}
         add_taxonomix_params_filter(filter)
       end
     end

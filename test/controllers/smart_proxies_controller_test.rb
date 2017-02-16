@@ -21,7 +21,7 @@ class SmartProxiesControllerTest < ActionController::TestCase
     ProxyAPI::Features.any_instance.stubs(:features => Feature.name_map.keys)
     SmartProxy.any_instance.stubs(:valid?).returns(true)
     SmartProxy.any_instance.stubs(:to_s).returns("puppet")
-    post :create, {:smart_proxy => {:name => "MySmartProxy", :url => "http://nowhere.net:8000"}}, set_session_user
+    post :create, {:smart_proxy=> {:name => "MySmartProxy", :urls_attributes => {"0"=>{:url => "http://nowhere.net:8000", :primary =>"1"}}}}, set_session_user
     assert_redirected_to smart_proxies_url
   end
 
@@ -32,15 +32,17 @@ class SmartProxiesControllerTest < ActionController::TestCase
 
   def test_update_invalid
     SmartProxy.any_instance.stubs(:valid?).returns(false)
-    put :update, {:id => SmartProxy.first.to_param, :smart_proxy => {:url => nil}}, set_session_user
+    put :update, {:id => SmartProxy.first.to_param, :smart_proxy => {:urls_attributes => {"0"=>{:url => nil, 
+                  :id => SmartProxy.first.urls.where(:primary => true).first.id, :primary =>"1"}}}}, set_session_user
     assert_template 'edit'
   end
 
   def test_update_valid
     SmartProxy.any_instance.stubs(:valid?).returns(true)
     put :update, {:id => SmartProxy.unscoped.first,
-                  :smart_proxy => {:url => "http://elsewhere.com:8443"}}, set_session_user
-    assert_equal "http://elsewhere.com:8443", SmartProxy.unscoped.first.url
+                  :smart_proxy => {:urls_attributes => {"0"=>{:url =>"http://elsewhere.com:8443",
+                  :id =>SmartProxy.unscoped.first.urls.where(:primary => true).first.id, :primary => true}}}}, set_session_user
+    assert_equal "http://elsewhere.com:8443", SmartProxy.unscoped.first.primary_url
     assert_redirected_to smart_proxies_url
   end
 

@@ -37,7 +37,7 @@ module Api
         param :architecture_id, :number, :desc => "required if host is managed and value is not inherited from host group"
         param :domain_id, :number, :desc => "required if host is managed and value is not inherited from host group"
         param :realm_id, :number
-        param :puppet_proxy_id, :number
+        param :puppet_proxy_url_id, :number
         param :puppetclass_ids, Array
         param :operatingsystem_id, String, :desc => "required if host is managed and value is not inherited from host group"
         param :medium_id, String, :desc => "required if not imaged based provisioning and host is managed and value is not inherited from host group"
@@ -50,7 +50,7 @@ module Api
         param :model_id, :number
         param :hostgroup_id, :number
         param :owner_id, :number
-        param :puppet_ca_proxy_id, :number
+        param :puppet_ca_proxy_url_id, :number
         param :image_id, :number
         param :host_parameters_attributes, Array, :desc => "Host's parameters (array or indexed hash)" do
           param :name, String, :desc => "Name of the parameter", :required => true
@@ -86,7 +86,7 @@ module Api
         param :mac, String, :desc => "not required if its a virtual machine"
         param :architecture_id, :number
         param :domain_id, :number
-        param :puppet_proxy_id, :number
+        param :puppet_proxy_url_id, :number
         param :operatingsystem_id, String
         param :puppetclass_ids, Array
         param :medium_id, :number
@@ -98,7 +98,7 @@ module Api
         param :model_id, :number
         param :hostgroup_id, :number
         param :owner_id, :number
-        param :puppet_ca_proxy_id, :number
+        param :puppet_ca_proxy_url_id, :number
         param :image_id, :number
         param :host_parameters_attributes, Array
         param :build, :bool

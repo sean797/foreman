@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class Api::V2::SmartProxiesControllerTest < ActionController::TestCase
-  valid_attrs = { :name => 'master02', :url => 'http://server:8443' }
+  valid_attrs = { :name => 'master02', :urls_attributes => {"0" => { :url => 'http://server:8443', :primary => "1" }} }
 
   setup do
     ProxyAPI::Features.any_instance.stubs(:features => Feature.name_map.keys)

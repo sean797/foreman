@@ -1,0 +1,20 @@
+<div class="tab-pane" id="urls">
+  <%= alert(:class => 'alert-info',
+            :text => _('The Proxies certificates must also be signed with these names')) %>
+  <table class="table" id="smart_proxy_url_table">
+    <thead class="white-header">
+    <tr>
+      <th class='col-md-3'><%= _("URLs") %></th>
+      <th class='col-md-1 ca'><%= _('Actions') %></th>
+    </tr>
+    </thead>
+    <tbody>
+      <% f.object.secondary_urls.each do |sec_url| %>
+        <%= f.fields_for :urls, sec_url do |builder| %>
+          <%= render "smart_proxies/secondary_url", :f => builder %>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+  <%= link_to_add_fields('+ ' + _("Add URL"), f, :urls, "smart_proxies/secondary_url", :target => '#smart_proxy_url_table') %>
+</div>

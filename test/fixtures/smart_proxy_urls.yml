@@ -1,0 +1,38 @@
+one:
+  smart_proxy: one
+  url: https://somewhere.net:8443
+  primary: true
+
+two:
+  smart_proxy: two
+  url: http://somewhere.else
+  primary: true
+
+three:
+  smart_proxy: three 
+  url: http://else.where:45671
+  primary: true
+
+puppetmaster:
+  smart_proxy: puppetmaster
+  url: http://else.where:4567
+  primary: true
+
+realm:
+  smart_proxy: realm 
+  url: http://else.where:1337
+  primary: true
+
+four:
+  smart_proxy: four 
+  url: http://else.where:45672
+
+bmc:
+  smart_proxy: bmc 
+  url: http://else.where:45673
+  primary: true
+
+logs:
+  smart_proxy: logs
+  url: http://else.where:45674
+  primary: true

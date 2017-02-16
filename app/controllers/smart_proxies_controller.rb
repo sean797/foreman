@@ -62,7 +62,7 @@ class SmartProxiesController < ApplicationController
   end
 
   def puppet_dashboard
-    @data = Dashboard::Data.new("puppet_proxy_id = \"#{@smart_proxy.id}\"")
+    @data = Dashboard::Data.new("puppet_proxy.id = \"#{@smart_proxy.id}\"")
     render :partial => 'smart_proxies/plugins/puppet_dashboard'
   rescue Foreman::Exception => exception
     process_ajax_error exception

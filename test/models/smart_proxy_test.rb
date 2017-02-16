@@ -4,7 +4,7 @@ class SmartProxyTest < ActiveSupport::TestCase
   context 'url validations' do
     setup do
       @proxy = FactoryGirl.
-        build_stubbed(:smart_proxy, :url => 'https://secure.proxy:4568')
+        build_stubbed(:smart_proxy, :primary_url => 'https://secure.proxy:4568')
     end
 
     test "should be valid" do
@@ -12,22 +12,22 @@ class SmartProxyTest < ActiveSupport::TestCase
     end
 
     test "should not be modified if has no leading slashes" do
-      assert_equal @proxy.url, "https://secure.proxy:4568"
+      assert_equal @proxy.primary_url, "https://secure.proxy:4568"
     end
   end
 
   test "should not include trailing slash" do
     ProxyAPI::Features.any_instance.stubs(:features => Feature.name_map.keys)
     @proxy = FactoryGirl.build(:smart_proxy)
-    @proxy.url = 'http://some.proxy:4568/'
+    @proxy.primary_url = 'http://some.proxy:4568/'
     as_admin { assert @proxy.save }
-    assert_equal @proxy.url, "http://some.proxy:4568"
+    assert_equal @proxy.primary_url, "http://some.proxy:4568"
   end
 
   context 'legacy puppet hostname' do
     setup do
       @proxy = FactoryGirl.build_stubbed(:smart_proxy)
-      @proxy.url = "http://puppet.example.com:4568"
+      @proxy.primary_url = "http://puppet.example.com:4568"
     end
 
     test "when true returns puppet part of hostname" do
@@ -83,7 +83,7 @@ class SmartProxyTest < ActiveSupport::TestCase
   end
 
   test "should not be saved if features do not exist" do
-    proxy = SmartProxy.new(:name => 'Proxy', :url => 'https://some.where.net:8443')
+    proxy = SmartProxy.new(:name => 'Proxy', :primary_url => 'https://some.where.net:8443')
     error_message = 'Features "feature" in this proxy are not recognized by Foreman. '\
     'If these features come from a Smart Proxy plugin, make sure Foreman has the plugin installed too.'
     ProxyAPI::Features.any_instance.stubs(:features =>["feature"])
@@ -92,7 +92,7 @@ class SmartProxyTest < ActiveSupport::TestCase
   end
 
   test "should not be saved if features are not array" do
-    proxy = SmartProxy.new(:name => 'Proxy', :url => 'https://some.where.net:8443')
+    proxy = SmartProxy.new(:name => 'Proxy', :primary_url => 'https://some.where.net:8443')
     ProxyAPI::Features.any_instance.stubs(:features => {:fe => :at, :ur => :e})
     refute proxy.save
     assert_equal('An invalid response was received while requesting available features from this proxy', proxy.errors[:base].first)

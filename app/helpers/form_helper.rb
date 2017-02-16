@@ -144,6 +144,33 @@ module FormHelper
     end
   end
 
+  def grouped_select_f(f, attr, group, select_options = {}, html_options = {})
+    disable_button = select_options.delete(:disable_button)
+    disable_button_enabled = select_options.delete(:disable_button_enabled)
+    user_set = !!select_options.delete(:user_set)
+
+    field(f, attr, html_options) do
+      addClass html_options, "form-control"
+
+      select = f.select attr, group, select_options, html_options
+
+      if disable_button
+        button_part =
+            content_tag :span, class: 'input-group-btn' do
+              content_tag(:button, disable_button, :type => 'button', :href => '#',
+                          :name => 'is_overridden_btn',
+                          :onclick => "disableButtonToggle(this)",
+                          :class => 'btn btn-default btn-can-disable' + (disable_button_enabled ? ' active' : ''),
+                          :data => { :toggle => 'button', :explicit => user_set })
+            end
+
+        input_group select, button_part
+      else
+        select
+      end
+    end
+  end
+
   def addClass(options = {}, new_class = '')
     options[:class] = "#{new_class} #{options[:class]}"
   end
@@ -320,6 +347,7 @@ module FormHelper
     return true unless f.object.respond_to?(:parent_id) && f.object.parent_id
     inherited_value   = f.object.send(attr).try(:name_method)
     inherited_value ||= _("no value")
+
     _("Inherit parent (%s)") % inherited_value
   end
 

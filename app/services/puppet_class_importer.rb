@@ -6,12 +6,12 @@ class PuppetClassImporter
 
     if args[:proxy]
       @proxy = args[:proxy]
-    elsif args[:url]
-      @proxy = ProxyAPI::Puppet.new(:url => args[:url])
+    elsif args[:primary_url]
+      @proxy = ProxyAPI::Puppet.new(:primary_url => args[:primary_url])
     else
-      url = SmartProxy.with_features("Puppet").first.try(:url)
-      raise "Can't find a valid Proxy with a Puppet feature" if url.blank?
-      @proxy = ProxyAPI::Puppet.new(:url => url)
+      primary_url = SmartProxy.with_features("Puppet").first.try(:primary_url)
+      raise "Can't find a valid Proxy with a Puppet feature" if primary_url.blank?
+      @proxy = ProxyAPI::Puppet.new(:primary_url => primary_url)
     end
   end
 

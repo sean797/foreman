@@ -1,9 +1,13 @@
 module SharedSmartProxiesHelper
-  def smart_proxy_fields(f, options = {})
+  def smart_proxy_fields(f, url = false, options = {})
     object = options.fetch(:object, f.object)
 
-    safe_join(object.registered_smart_proxies.map do |proxy_name, proxy_options|
-      smart_proxy_select_f(f, proxy_name, options.merge(proxy_options))
+    safe_join(object.registered_smart_proxies.map do |feature_name, proxy_options|
+      if url
+        smart_proxy_url_select_f(f, feature_name, options.merge(proxy_options))
+      else
+        smart_proxy_select_f(f, feature_name, options.merge(proxy_options))
+      end
     end)
   end
 
@@ -31,6 +35,29 @@ module SharedSmartProxiesHelper
       :label => _(options[:label]),
       :help_inline => _(options[:description]),
       :wrapper_class => "form-group #{'hide' if hidden}"
+  end
+
+  def smart_proxy_url_select_f(f, resource, options)
+    required = options.fetch(:required, false)
+    hidden = options[:if].present? && !options[:if].call(f.object)
+    can_override = options.fetch(:can_override, false)
+    override = options.fetch(:override, false)
+    blank = options.fetch(:blank, blank_or_inherit_f(f, resource))
+
+    select_options = {
+      :disable_button => can_override ? _(INHERIT_TEXT) : nil,
+      :disable_button_enabled => override && !explicit_value?(:"#{resource}_id"),
+      :user_set => user_set?(:"#{resource}_id")
+    }
+    select_options[:include_blank] = blank unless required
+
+    grouped_select_f f, :"#{resource}_id",
+      grouped_options_for_select(SmartProxyUrl.for_select(options[:feature]), f.object.send("#{resource}_id")),
+      select_options,
+      :label => _(options[:label]),
+      :help_inline => _(options[:description]),
+      :wrapper_class => "form-group #{'hide' if hidden}",
+      :include_blank => true
   end
 
   def accessible_smart_proxies(obj, resource, feature)

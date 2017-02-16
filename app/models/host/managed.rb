@@ -158,7 +158,7 @@ class Host::Managed < Host::Base
   # some shortcuts
   alias_attribute :arch, :architecture
 
-  validates :environment_id, :presence => true, :unless => Proc.new { |host| host.puppet_proxy_id.blank? }
+  validates :environment_id, :presence => true, :unless => Proc.new { |host| host.puppet_proxy_url_id.blank? }
   validates :organization_id, :presence => true, :if => Proc.new { |host| host.managed? && SETTINGS[:organizations_enabled] }
   validates :location_id,     :presence => true, :if => Proc.new { |host| host.managed? && SETTINGS[:locations_enabled] }
 
@@ -345,7 +345,7 @@ class Host::Managed < Host::Base
 
   # Determine if host is setup for configuration
   def configuration?
-    puppet_proxy_id.present?
+    puppet_proxy_url_id.present?
   end
 
   # the environment used by #clases nees to be self.environment and not self.parent.environment
@@ -438,7 +438,7 @@ class Host::Managed < Host::Base
 
     # if proxy authentication is enabled and we have no puppet proxy set and the upload came from puppet,
     # use it as puppet proxy.
-    host.puppet_proxy_id ||= proxy_id if import_type == 'puppet'
+    host.puppet_proxy.id ||= proxy_id if import_type == 'puppet'
 
     host
   end
@@ -570,7 +570,7 @@ class Host::Managed < Host::Base
   end
 
   def hostgroup_inherited_attributes
-    %w{puppet_proxy_id puppet_ca_proxy_id environment_id compute_profile_id realm_id}
+    %w{puppet_proxy_url_id puppet_ca_proxy_url_id environment_id compute_profile_id realm_id}
   end
 
   def apply_inherited_attributes(attributes, initialized = true)

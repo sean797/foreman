@@ -2,6 +2,7 @@
   <%= base_errors_for @smart_proxy %>
   <ul class="nav nav-tabs" data-tabs="tabs">
     <li class="active"><a href="#primary" data-toggle="tab"><%= _("Smart Proxy") %></a></li>
+    <li><a href="#urls" data-toggle="tab"><%= _("Secondary URLs") %></a></li>
     <% if show_location_tab? %>
       <li><a href="#locations" data-toggle="tab"><%= _("Locations") %></a></li>
     <% end %>
@@ -13,8 +14,13 @@
   <div class="tab-content">
     <div class="tab-pane active" id="primary">
       <%= text_f(f, :name) %>
-      <%= text_f(f, :url, :size => "col-md-8" ) %>
+      <%= f.fields_for :urls, f.object.urls.where(primary: true).first_or_initialize do |builder| %>
+        <%= text_f(builder, :url, :size => "col-md-8", :label => _("Primary URL"), :help_inline => _("Used for Foreman and Smart Proxy communication") ) %>
+        <%= builder.hidden_field :primary, :value => "1" %>
+      <% end %>
     </div>
+
+    <%= render 'smart_proxies/sec_urls_tab.html.erb', :f => f, :obj => @smart_proxy %>
 
     <%= render 'taxonomies/loc_org_tabs', :f => f, :obj => @smart_proxy %>
 

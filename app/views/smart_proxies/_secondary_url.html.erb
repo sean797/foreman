@@ -1,0 +1,9 @@
+<tr class="fields" id="<%= dom_id(f.object) + '_row' %>">
+  <td>
+    <%= f.text_field(:url, :class => "form-control", :placeholder => _("URL")) %>
+  </td>
+  <td>
+    <%= link_to_remove_fields(_('remove'), f, :title =>'Remove URL') %>
+  </td>
+</tr>
+

@@ -5,19 +5,20 @@ require 'securerandom'
 module HostCommon
   extend ActiveSupport::Concern
   include BelongsToProxies
+  include BelongsToProxyUrls
 
   included do
-    belongs_to_proxy :puppet_proxy,
+    belongs_to_proxy_url :puppet_proxy_url,
       :feature => N_('Puppet'),
       :label => N_('Puppet Master'),
       :description => N_('Use this puppet server as an initial Puppet Server or to execute puppet runs'),
       :api_description => N_('Puppet proxy ID')
 
-    belongs_to_proxy :puppet_ca_proxy,
+    belongs_to_proxy_url :puppet_ca_proxy_url,
       :feature => 'Puppet CA',
       :label => N_('Puppet CA'),
       :description => N_('Use this puppet server as a CA server'),
-      :api_description => N_('Puppet CA proxy ID')
+      :api_description => N_('Puppet CA proxy URL ID')
 
     belongs_to :architecture
     belongs_to :environment
@@ -62,6 +63,34 @@ module HostCommon
     end
   end
 
+  def puppet_ca_proxy_id
+    Foreman::Deprecation.deprecation_warning('1.17', "Use puppet_ca_proxy.id instead of puppet_ca_proxy_id for accessing a Hosts Puppet CA Smary Proxy ID attribute")
+    SmartProxy.reset_column_information
+    if SmartProxy.column_names.include? 'puppet_ca_proxy_id'
+      read_attribute(:puppet_ca_proxy_id)
+    else
+      self.puppet_ca_proxy.try(:id)
+    end
+  end
+
+  def puppet_ca_proxy
+    self.puppet_ca_proxy_url.try(:smart_proxy)
+  end
+
+  def puppet_proxy_id
+    Foreman::Deprecation.deprecation_warning('1.17', "Use puppet_proxy.id instead of puppet_proxy_id for accessing a Hosts Puppet Smary Proxy ID attribute")
+    SmartProxy.reset_column_information
+    if SmartProxy.column_names.include? 'puppet_proxy_id'
+      read_attribute(:puppet_proxy_id)
+    else
+      self.puppet_proxy.try(:id)
+    end
+  end
+
+  def puppet_proxy
+    self.puppet_proxy_url.try(:smart_proxy)
+  end
+
   def parent_name
     if is_a?(Host::Base) && hostgroup
       hostgroup.name
@@ -81,18 +110,18 @@ module HostCommon
   end
 
   def puppetca_exists?
-    !!(puppet_ca_proxy && puppet_ca_proxy.url.present?)
+    !!(puppet_ca_proxy_url && puppet_ca_proxy_url.url.present?)
   end
 
   # no need to store anything in the db if the entry is plain "puppet"
   # If the system is using smart proxies and the user has run the smartproxy:migrate task
   # then the puppetmaster functions handle smart proxy objects
   def puppetmaster
-    puppet_proxy.to_s
+    puppet_proxy_url.hostname
   end
 
   def puppet_ca_server
-    puppet_ca_proxy.to_s
+    puppet_ca_proxy_url.hostname
   end
 
   # If the host/hostgroup has a medium then use the path from there
@@ -239,9 +268,9 @@ module HostCommon
 
   # fall back to our puppet proxy in case our puppet ca is not defined/used.
   def check_puppet_ca_proxy_is_required?
-    return true if puppet_ca_proxy_id.present? || puppet_proxy_id.blank?
+    return true if puppet_ca_proxy_url_id.present? || puppet_proxy_url_id.blank?
     if puppet_proxy.has_feature?('Puppet CA')
-      self.puppet_ca_proxy ||= puppet_proxy
+      self.puppet_ca_proxy_url ||= puppet_proxy_url
     end
   rescue
     true # we don't want to break anything, so just skipping.

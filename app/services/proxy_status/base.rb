@@ -38,7 +38,7 @@ module ProxyStatus
     attr_reader :proxy, :cache_duration, :cache
 
     def api
-      @api ||= api_class.new(:url => proxy.url)
+      @api ||= api_class.new(:primary_url => proxy.primary_url)
     rescue NameError => e
       raise Foreman::WrappedException.new(e, N_('Unable to initialize ProxyAPI class %s'), "ProxyAPI::#{self.class.humanized_name}")
     end

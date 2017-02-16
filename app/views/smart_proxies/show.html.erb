@@ -32,10 +32,18 @@
         </div>
         <div class="row">
           <div class="col-md-4">
-            <%= _('URL') %>
+            <%= _('Primary URL') %>
           </div>
           <div class="col-md-8">
-            <%= @smart_proxy.url %>
+            <%= @smart_proxy.primary_url %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <%= _('Secondary URL(s)') %>
+          </div>
+          <div class="col-md-8">
+            <%= @smart_proxy.secondary_urls.map(&:url).to_sentence %>
           </div>
         </div>
         <div class="row">

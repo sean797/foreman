@@ -33,10 +33,10 @@ module Api
         param :architecture_id, :number
         param :medium_id, :number
         param :ptable_id, :number
-        param :puppet_ca_proxy_id, :number
+        param :puppet_ca_proxy_url_id, :number
         param :subnet_id, :number
         param :domain_id, :number
-        param :puppet_proxy_id, :number
+        param :puppet_proxy_url_id, :number
       end
 
       def create
@@ -57,10 +57,10 @@ module Api
         param :medium_id, :number
         param :pxe_loader, Operatingsystem.all_loaders, :desc => N_("DHCP filename option")
         param :ptable_id, :number
-        param :puppet_ca_proxy_id, :number
+        param :puppet_ca_proxy_url_id, :number
         param :subnet_id, :number
         param :domain_id, :number
-        param :puppet_proxy_id, :number
+        param :puppet_proxy_ld, :number
       end
 
       def update

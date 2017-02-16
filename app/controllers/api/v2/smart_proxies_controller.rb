@@ -22,10 +22,19 @@ module Api
       def show
       end
 
+      def_param_group :url_attributes do
+        param :id, Fixnum, :desc => N_("Smart Proxy URL ID")
+        param :url, String, :desc => N_("URL of Smart Proxy")
+        param :primary, :bool, :desc => N_("Set Primary URL of Smart Proxy")
+      end
+
       def_param_group :smart_proxy do
         param :smart_proxy, Hash, :required => true, :action_aware => true do
           param :name, String, :required => true
-          param :url, String, :required => true
+          param :primary_url, String, :required => true
+          param :url_attributes, Array, :desc => N_("Smart proxy URL attributes.") do
+            param_group :url_attributes, ::Api::V2::SmartProxiesController
+          end
           param_group :taxonomies, ::Api::V2::BaseController
         end
       end
