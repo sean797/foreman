@@ -95,7 +95,7 @@ class HostsControllerTest < ActionController::TestCase
           :pxe_loader => "Grub2 UEFI",
           :realm_id => realms(:myrealm).id,
           :disk => "empty partition",
-          :puppet_proxy_id => smart_proxies(:puppetmaster).id,
+          :puppet_proxy_pool_id => smart_proxy_pools(:puppetmaster).id,
           :root_pass           => "xybxa6JUkz63w",
           :location_id => taxonomies(:location1).id,
           :organization_id => taxonomies(:organization1).id
@@ -170,7 +170,7 @@ class HostsControllerTest < ActionController::TestCase
   end
 
   test "externalNodes should render correctly when format text/html is given" do
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name }, session: set_session_user
     assert_response :success
     as_admin { @enc = @host.info.to_yaml}
@@ -178,7 +178,7 @@ class HostsControllerTest < ActionController::TestCase
   end
 
   test "externalNodes should render yml request correctly" do
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }, session: set_session_user
     assert_response :success
     as_admin { @enc = @host.info.to_yaml }
@@ -566,7 +566,7 @@ class HostsControllerTest < ActionController::TestCase
     end
   end
 
-  describe "setting puppet proxy on multiple hosts" do
+  describe "setting puppet proxy pool on multiple hosts" do
     before do
       setup_user_and_host "edit"
       as_admin do
@@ -574,83 +574,80 @@ class HostsControllerTest < ActionController::TestCase
       end
     end
 
-    test "should change the puppet proxy" do
+    test "should change the puppet proxy pool" do
       @request.env['HTTP_REFERER'] = hosts_path
 
-      proxy = as_admin { FactoryBot.build(:puppet_smart_proxy) }
-
       params = { :host_ids => @hosts.map(&:id),
-                 :proxy => { :proxy_id => proxy.id } }
+                 :proxy_pool => { :pool_id => smart_proxy_pools(:puppetmaster).id } }
 
-      post :update_multiple_puppet_proxy, params: params,
+      post :update_multiple_puppet_proxy_pool, params: params,
         session: set_session_user.merge(:user => users(:admin).id)
 
       assert_empty flash[:error]
 
       @hosts.each do |host|
-        assert_nil host.reload.puppet_ca_proxy
+        assert_equal smart_proxy_pools(:puppetmaster), host.reload.puppet_ca_proxy_pool
       end
     end
 
-    test "should clear the puppet proxy of multiple hosts" do
+    test "should clear the puppet proxy pool of multiple hosts" do
       @request.env['HTTP_REFERER'] = hosts_path
 
       params = { :host_ids => @hosts.map(&:id),
-                 :proxy => { :proxy_id => "" } }
+                 :proxy_pool => { :pool_id => "" } }
 
-      post :update_multiple_puppet_proxy, params: params,
+      post :update_multiple_puppet_proxy_pool, params: params,
         session: set_session_user.merge(:user => users(:admin).id)
 
       assert_empty flash[:error]
 
       @hosts.each do |host|
-        assert_nil host.reload.puppet_ca_proxy
+        assert_nil host.reload.puppet_ca_proxy_pool
       end
     end
   end
 
-  describe "setting puppet ca proxy on multiple hosts" do
+  describe "setting puppet ca proxy pool on multiple hosts" do
     before do
       setup_user_and_host "edit"
+      SmartProxyPool.any_instance.stubs(:vaild_certs => true)
       as_admin do
         @hosts = FactoryBot.create_list(:host, 2, :with_puppet_ca)
       end
     end
 
-    test "should change the puppet ca proxy" do
+    test "should change the puppet ca proxy pool" do
       @request.env['HTTP_REFERER'] = hosts_path
 
-      proxy = as_admin { FactoryBot.create(:smart_proxy, :features => [FactoryBot.create(:feature, :puppetca)]) }
-
       params = { :host_ids => @hosts.map(&:id),
-                 :proxy => { :proxy_id => proxy.id } }
+                 :proxy_pool => { :pool_id => smart_proxy_pools(:puppetmaster).id } }
 
-      post :update_multiple_puppet_ca_proxy, params: params,
+      post :update_multiple_puppet_ca_proxy_pool, params: params,
         session: set_session_user.merge(:user => users(:admin).id)
 
       assert_empty flash[:error]
 
       @hosts.each do |host|
         as_admin do
-          assert_equal proxy, host.reload.puppet_ca_proxy
+          assert_equal smart_proxy_pools(:puppetmaster), host.reload.puppet_ca_proxy_pool
         end
       end
     end
 
-    test "should clear the puppet ca proxy" do
+    test "should clear the puppet ca proxy pool" do
       @request.env['HTTP_REFERER'] = hosts_path
 
       params = { :host_ids => @hosts.map(&:id),
-                 :proxy => { :proxy_id => "" } }
+                 :proxy_pool => { :pool_id => "" } }
 
-      post :update_multiple_puppet_ca_proxy, params: params,
+      post :update_multiple_puppet_ca_proxy_pool, params: params,
         session: set_session_user.merge(:user => users(:admin).id)
 
       assert_empty flash[:error]
 
       @hosts.each do |host|
         as_admin do
-          assert_nil host.reload.puppet_ca_proxy
+          assert_nil host.reload.puppet_ca_proxy_pool
         end
       end
     end
@@ -849,7 +846,7 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:restrict_registered_smart_proxies] = false
     SETTINGS[:require_ssl] = false
 
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -859,7 +856,7 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:restrict_registered_smart_proxies] = true
     Setting[:require_ssl_smart_proxies] = false
 
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -880,9 +877,9 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:require_ssl_smart_proxies] = true
 
     @request.env['HTTPS'] = 'on'
-    @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where'
+    @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where.puppetmaster'
     @request.env['SSL_CLIENT_VERIFY'] = 'SUCCESS'
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -894,9 +891,9 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:trusted_hosts] = ['else.where']
 
     @request.env['HTTPS'] = 'on'
-    @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where'
+    @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where.puppetmaster'
     @request.env['SSL_CLIENT_VERIFY'] = 'SUCCESS'
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -910,7 +907,7 @@ class HostsControllerTest < ActionController::TestCase
     @request.env['HTTPS'] = 'on'
     @request.env['SSL_CLIENT_S_DN'] = 'CN=foreman.example,OU=PUPPET,O=FOREMAN,ST=North Carolina,C=US'
     @request.env['SSL_CLIENT_VERIFY'] = 'SUCCESS'
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -924,7 +921,7 @@ class HostsControllerTest < ActionController::TestCase
     @request.env['HTTPS'] = 'on'
     @request.env['SSL_CLIENT_S_DN'] = '/C=US/ST=NC/L=City/O=Example/OU=IT/CN=foreman.linux.lab.local/emailAddress=user@example.com'
     @request.env['SSL_CLIENT_VERIFY'] = 'SUCCESS'
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -947,7 +944,7 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:require_ssl_smart_proxies] = true
 
     @request.env['HTTPS'] = 'on'
-    @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where'
+    @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where.puppetmaster'
     @request.env['SSL_CLIENT_VERIFY'] = 'FAILURE'
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_equal 403, @response.status
@@ -959,7 +956,7 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:require_ssl_smart_proxies] = true
     SETTINGS[:require_ssl] = true
 
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_equal 403, @response.status
   end
@@ -971,7 +968,7 @@ class HostsControllerTest < ActionController::TestCase
     Setting[:require_ssl_smart_proxies] = true
     SETTINGS[:require_ssl] = false
 
-    Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+    Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
     get :externalNodes, params: { :name => @host.name, :format => "yml" }
     assert_response :success
   end
@@ -1050,7 +1047,7 @@ class HostsControllerTest < ActionController::TestCase
     hosts = FactoryBot.create_list(:host, 2, :domain => domain,
                                     :environment => environments(:production),
                                     :location => taxonomies(:location2))
-    assert_difference "location.taxable_taxonomies.count", 1 do
+    assert_difference "location.taxable_taxonomies.count", 2 do
       post :update_multiple_location, params: {
         :location => {:id => location.id, :optimistic_import => "yes"},
         :host_ids => hosts.map(&:id)
@@ -1119,7 +1116,7 @@ class HostsControllerTest < ActionController::TestCase
     hosts = FactoryBot.create_list(:host, 2, :domain => domain,
                                     :environment => environments(:production),
                                     :organization => taxonomies(:organization2))
-    assert_difference "organization.taxable_taxonomies.count", 1 do
+    assert_difference "organization.taxable_taxonomies.count", 2 do
       post :update_multiple_organization, params: {
         :organization => { :id => organization.id, :optimistic_import => "yes"},
         :host_ids => hosts.map(&:id)
@@ -1676,19 +1673,19 @@ class HostsControllerTest < ActionController::TestCase
   def initialize_host
     User.current = users(:admin)
     disable_orchestration
-    @host = Host.create(:name               => "myfullhost",
-                        :mac                => "aabbecddeeff",
-                        :ip                 => "2.3.4.99",
-                        :domain_id          => domains(:mydomain).id,
-                        :operatingsystem_id => operatingsystems(:redhat).id,
-                        :architecture_id    => architectures(:x86_64).id,
-                        :environment_id     => environments(:production).id,
-                        :subnet_id          => subnets(:one).id,
-                        :disk               => "empty partition",
-                        :puppet_proxy_id    => smart_proxies(:puppetmaster).id,
-                        :root_pass          => "123456789",
-                        :location_id        => taxonomies(:location1).id,
-                        :organization_id    => taxonomies(:organization1).id
+    @host = Host.create(:name                     => "myfullhost",
+                        :mac                      => "aabbecddeeff",
+                        :ip                       => "2.3.4.99",
+                        :domain_id                => domains(:mydomain).id,
+                        :operatingsystem_id       => operatingsystems(:redhat).id,
+                        :architecture_id          => architectures(:x86_64).id,
+                        :environment_id           => environments(:production).id,
+                        :subnet_id                => subnets(:one).id,
+                        :disk                     => "empty partition",
+                        :puppet_proxy_pool_id => smart_proxy_pools(:puppetmaster).id,
+                        :root_pass                => "123456789",
+                        :location_id              => taxonomies(:location1).id,
+                        :organization_id          => taxonomies(:organization1).id
                        )
   end
 end

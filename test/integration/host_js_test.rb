@@ -361,7 +361,7 @@ class HostJSTest < IntegrationTestWithJavascript
     test 'choosing a hostgroup does not override other host attributes' do
       original_hostgroup = FactoryBot.
         create(:hostgroup, :environment => FactoryBot.create(:environment),
-                           :puppet_proxy => FactoryBot.create(:puppet_smart_proxy))
+                           :puppet_proxy_pool => FactoryBot.create(:puppet_smart_proxy).pools.first)
 
       # Make host inherit hostgroup environment
       @host.attributes = @host.apply_inherited_attributes(
@@ -375,9 +375,9 @@ class HostJSTest < IntegrationTestWithJavascript
       select2(original_hostgroup.name, :from => 'host_hostgroup_id')
       wait_for_ajax
 
-      assert_equal original_hostgroup.puppet_proxy.name, find("#s2id_host_puppet_proxy_id .select2-chosen").text
+      assert_equal original_hostgroup.puppet_proxy_pool.name, find("#s2id_host_puppet_proxy_pool_id .select2-chosen").text
 
-      click_on_inherit('puppet_proxy')
+      click_on_inherit('puppet_proxy_pool')
       select2(overridden_hostgroup.name, :from => 'host_hostgroup_id')
       wait_for_ajax
 
@@ -385,7 +385,7 @@ class HostJSTest < IntegrationTestWithJavascript
       assert_equal original_hostgroup.environment.name, environment
 
       # On host group change, the disabled select will be reset to an empty value
-      assert_equal '', find("#s2id_host_puppet_proxy_id .select2-chosen").text
+      assert_equal '', find("#s2id_host_puppet_proxy_pool_id .select2-chosen").text
     end
 
     test 'class parameters and overrides are displayed correctly for booleans' do

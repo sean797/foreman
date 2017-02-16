@@ -66,21 +66,20 @@ module TaxonomiesBaseTest
                                   :"#{taxonomy_name.pluralize}" => [taxonomy])
       domain = FactoryBot.build(:domain)
       FactoryBot.create(:host,
-                         :compute_resource => compute_resources(:one),
-                         :domain           => domain,
-                         :environment      => environments(:production),
-                         :medium           => media(:one),
-                         :operatingsystem  => operatingsystems(:centos5_3),
-                         :owner            => users(:scoped),
-                         :puppet_proxy     => smart_proxies(:puppetmaster),
-                         :realm            => realms(:myrealm),
-                         :subnet           => subnet,
-                         :"#{taxonomy_name}" => taxonomy,
+                         :compute_resource       => compute_resources(:one),
+                         :domain                 => domain,
+                         :environment            => environments(:production),
+                         :medium                 => media(:one),
+                         :operatingsystem        => operatingsystems(:centos5_3),
+                         :owner                  => users(:scoped),
+                         :puppet_proxy_pool      => smart_proxy_pools(:puppetmaster),
+                         :realm                  => realms(:myrealm),
+                         :subnet                 => subnet,
                          :"#{opposite_taxonomy}" => nil)
       FactoryBot.create(:os_default_template,
                          :provisioning_template  => templates(:mystring2),
-                         :operatingsystem  => operatingsystems(:centos5_3),
-                         :template_kind    => TemplateKind.find_by_name('provision'))
+                         :operatingsystem        => operatingsystems(:centos5_3),
+                         :template_kind          => TemplateKind.find_by_name('provision'))
       # run used_ids method
       used_ids = taxonomy.used_ids
       # get results from Host object
@@ -287,7 +286,7 @@ module TaxonomiesBaseTest
                          :medium           => media(:one),
                          :operatingsystem  => operatingsystems(:centos5_3),
                          :owner            => users(:scoped),
-                         :puppet_proxy     => smart_proxies(:puppetmaster),
+                         :puppet_proxy_pool => smart_proxy_pools(:puppetmaster),
                          :realm            => realms(:myrealm),
                          :subnet           => subnet)
       FactoryBot.build(:host,
@@ -295,8 +294,8 @@ module TaxonomiesBaseTest
                          :domain           => domain2)
       FactoryBot.build(:os_default_template,
                          :provisioning_template  => templates(:mystring2),
-                         :operatingsystem  => operatingsystems(:centos5_3),
-                         :template_kind    => TemplateKind.find_by_name('provision'))
+                         :operatingsystem        => operatingsystems(:centos5_3),
+                         :template_kind          => TemplateKind.find_by_name('provision'))
 
       # check that inherited_ids of taxonomy matches selected_ids of parent
       taxonomy.inherited_ids.each do |k,v|

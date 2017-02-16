@@ -42,7 +42,7 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       Setting[:restrict_registered_smart_proxies] = false
       SETTINGS[:require_ssl] = false
 
-      Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+      Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
       post :create, params: { :report => create_a_puppet_transaction_report }
       assert_nil @controller.detected_proxy
       assert_response :created
@@ -53,7 +53,9 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       Setting[:require_ssl_smart_proxies] = false
 
       proxy = smart_proxies(:puppetmaster)
-      as_admin { proxy.update_attribute(:url, 'http://configreports.foreman') }
+      host = 'configreports.foreman'
+      as_admin { proxy.update_attribute(:url, "http://#{host}") }
+      as_admin { proxy.pools.first.update_attribute(:hostname, host) }
       host = URI.parse(proxy.url).host
       Resolv.any_instance.stubs(:getnames).returns([host])
       post :create, params: { :report => create_a_puppet_transaction_report }
@@ -75,7 +77,7 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       Setting[:require_ssl_smart_proxies] = true
 
       @request.env['HTTPS'] = 'on'
-      @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where'
+      @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where.puppetmaster'
       @request.env['SSL_CLIENT_VERIFY'] = 'SUCCESS'
       post :create, params: { :report => create_a_puppet_transaction_report }
       assert_response :created
@@ -97,7 +99,7 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       Setting[:require_ssl_smart_proxies] = true
 
       @request.env['HTTPS'] = 'on'
-      @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where'
+      @request.env['SSL_CLIENT_S_DN'] = 'CN=else.where.puppetmaster'
       @request.env['SSL_CLIENT_VERIFY'] = 'FAILED'
       post :create, params: { :report => create_a_puppet_transaction_report }
       assert_equal 403, @response.status
@@ -108,7 +110,7 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       Setting[:require_ssl_smart_proxies] = true
       SETTINGS[:require_ssl] = true
 
-      Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+      Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
       post :create, params: { :report => create_a_puppet_transaction_report }
       assert_equal 403, @response.status
     end
@@ -119,7 +121,7 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       Setting[:require_ssl_smart_proxies] = true
       SETTINGS[:require_ssl] = false
 
-      Resolv.any_instance.stubs(:getnames).returns(['else.where'])
+      Resolv.any_instance.stubs(:getnames).returns(['else.where.puppetmaster'])
       post :create, params: { :report => create_a_puppet_transaction_report }
       assert_response :created
     end
