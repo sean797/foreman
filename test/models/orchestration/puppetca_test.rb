@@ -2,6 +2,7 @@ require 'test_helper'
 
 class PuppetCaOrchestrationTest < ActiveSupport::TestCase
   def setup
+    SmartProxyPool.any_instance.stubs(:vaild_certs => true)
     users(:one).roles << Role.find_by_name('Manager')
     User.current = users(:one)
     disable_orchestration

@@ -86,6 +86,7 @@ module Menu
           if SETTINGS[:unattended]
             menu.item :compute_resources, :caption => N_('Compute Resources')
             menu.item :compute_profiles,  :caption => N_('Compute Profiles')
+            menu.divider
             menu.item :subnets,           :caption => N_('Subnets')
             menu.item :domains,           :caption => N_('Domains')
             menu.item :http_proxies,      :caption => N_('HTTP Proxies')

@@ -13,6 +13,7 @@ module PuppetHostExtensions
 
     # if proxy authentication is enabled and we have no puppet proxy set and the upload came from puppet,
     # use it as puppet proxy.
-    self.puppet_proxy ||= source_proxy
+    proxy_hostname = source_proxy.try(:hostnames).try(:first)
+    self.puppet_proxy_hostname ||= proxy_hostname
   end
 end
