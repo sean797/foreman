@@ -801,12 +801,12 @@ class HostsController < ApplicationController
     end
   end
 
-  def validate_multiple_puppet_proxy_hostname
-    validate_multiple_proxy_hostname(select_multiple_puppet_proxy_hostname_hosts_path)
+  def validate_multiple_puppet_proxy_pool
+    validate_multiple_proxy_pool(select_multiple_puppet_proxy_pool_hosts_path)
   end
 
-  def validate_multiple_puppet_ca_proxy_hostname
-    validate_multiple_proxy_hostname(select_multiple_puppet_ca_proxy_hostname_hosts_path)
+  def validate_multiple_puppet_ca_proxy_pool
+    validate_multiple_proxy_pool(select_multiple_puppet_ca_proxy_pool_hosts_path)
   end
 
   def validate_multiple_proxy(redirect_path)

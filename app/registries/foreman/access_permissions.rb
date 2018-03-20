@@ -331,8 +331,8 @@ Foreman::AccessControl.map do |permission_set|
                                                :disassociate, :multiple_disassociate, :update_multiple_disassociate,
                                                :select_multiple_owner, :update_multiple_owner,
                                                :select_multiple_power_state, :update_multiple_power_state,
-                                               :select_multiple_puppet_proxy_hostname, :update_multiple_puppet_proxy_hostname,
-                                               :select_multiple_puppet_ca_proxy_hostname, :update_multiple_puppet_ca_proxy_hostname,
+                                               :select_multiple_puppet_proxy_pool, :update_multiple_puppet_proxy_pool,
+                                               :select_multiple_puppet_ca_proxy_pool, :update_multiple_puppet_ca_proxy_pool,
                                                :select_multiple_location, :update_multiple_location].push(*ajax_actions),
                                     :compute_resources => [:associate].push(cr_ajax_actions),
                                     :compute_resources_vms => [:associate],
@@ -551,18 +551,18 @@ Foreman::AccessControl.map do |permission_set|
     }
   end
 
-  permission_set.security_block :hostnames do |map|
-    map.permission :view_hostnames, {:hostnames => [:index, :auto_complete_search],
-                                     :"api/v2/hostnames" => [:index, :show]
+  permission_set.security_block :smart_proxy_pools do |map|
+    map.permission :view_smart_proxy_pools, {:smart_proxy_pools => [:index, :auto_complete_search],
+                                     :"api/v2/smart_proxy_pools" => [:index, :show]
     }
-    map.permission :create_hostnames, {:hostnames => [:new, :create],
-                                       :"api/v2/hostnames" => [:create]
+    map.permission :create_smart_proxy_pools, {:smart_proxy_pools => [:new, :create],
+                                       :"api/v2/smart_proxy_pools" => [:create]
     }
-    map.permission :edit_hostnames, {:hostnames => [:edit, :update],
-                                     :"api/v2/hostnames" => [:update]
+    map.permission :edit_smart_proxy_pools, {:smart_proxy_pools => [:edit, :update],
+                                     :"api/v2/smart_proxy_pools" => [:update]
     }
-    map.permission :destroy_hostnames, {:hostnames => [:destroy],
-                                        :"api/v2/hostnames" => [:destroy]
+    map.permission :destroy_smart_proxy_pools, {:smart_proxy_pools => [:destroy],
+                                        :"api/v2/smart_proxy_pools" => [:destroy]
     }
   end
 

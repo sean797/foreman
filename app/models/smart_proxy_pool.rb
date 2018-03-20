@@ -5,20 +5,20 @@ class SmartProxyPool < ApplicationRecord
   include Taxonomix
   audited
 
-  has_and_belongs_to_many :smart_proxies
+  has_and_belongs_to_many :smart_proxies, :join_table => :pools_smart_proxies
 
   before_destroy EnsureNotUsedBy.new(:hosts, :hostgroups, [:puppet_ca_hosts, :hosts], [:puppet_ca_hostgroups, :hostgroups])
 
   has_many :features, :through => :smart_proxies
-  has_many_hosts                                              :foreign_key => 'puppet_proxy_hostname_id'
-  has_many :hostgroups,                                       :foreign_key => 'puppet_proxy_hostname_id'
-  has_many :puppet_ca_hosts, :class_name => 'Host::Managed',  :foreign_key => 'puppet_ca_proxy_hostname_id'
-  has_many :puppet_ca_hostgroups, :class_name => 'Hostgroup', :foreign_key => 'puppet_ca_proxy_hostname_id'
+  has_many_hosts                                              :foreign_key => 'puppet_proxy_pool_id'
+  has_many :hostgroups,                                       :foreign_key => 'puppet_proxy_pool_id'
+  has_many :puppet_ca_hosts, :class_name => 'Host::Managed',  :foreign_key => 'puppet_ca_proxy_pool_id'
+  has_many :puppet_ca_hostgroups, :class_name => 'Hostgroup', :foreign_key => 'puppet_ca_proxy_pool_id'
 
   validates :hostname, :length => {:maximum => 255}, :presence => true, :uniqueness => true
   validates :name, :uniqueness => true, :presence => true
-  validate :same_features, :if => Proc.new { |hn| hn.smart_proxies.any? }
-  validate :vaild_certs, :if => Proc.new { |hn| hn.smart_proxies.any? }
+  validate :same_features, :if => Proc.new { |pool| pool.smart_proxies.any? }
+  validate :vaild_certs, :if => Proc.new { |pool| pool.smart_proxies.any? }
 
   before_save :sanitize_hostname
 
@@ -38,12 +38,12 @@ class SmartProxyPool < ApplicationRecord
     self.smart_proxies.first.try(:has_feature?, feature) || false
   end
 
-  def self.hostname_ids_for(hosts)
+  def self.smart_proxy_pool_ids_for(hosts)
     ids = []
-    ids << hosts.pluck('DISTINCT puppet_proxy_hostname_id')
-    ids << hosts.pluck('DISTINCT puppet_ca_proxy_hostname_id')
-    ids << hosts.joins(:hostgroup).pluck('DISTINCT hostgroups.puppet_proxy_hostname_id')
-    ids << hosts.joins(:hostgroup).pluck('DISTINCT hostgroups.puppet_ca_proxy_hostname_id')
+    ids << hosts.pluck('DISTINCT puppet_proxy_pool_id')
+    ids << hosts.pluck('DISTINCT puppet_ca_proxy_pool_id')
+    ids << hosts.joins(:hostgroup).pluck('DISTINCT hostgroups.puppet_proxy_pool_id')
+    ids << hosts.joins(:hostgroup).pluck('DISTINCT hostgroups.puppet_ca_proxy_pool_id')
     # returned both 7, "7". need to convert to integer or there are duplicates
     ids.flatten.compact.map { |i| i.to_i }.uniq
   end
@@ -51,11 +51,11 @@ class SmartProxyPool < ApplicationRecord
   def taxonomy_foreign_conditions
     conditions = {}
     if has_feature?('Puppet') && has_feature?('Puppet CA')
-      conditions = "puppet_proxy_hostname_id = #{id} OR puppet_ca_proxy_hostname_id = #{id}"
+      conditions = "puppet_proxy_pool_id = #{id} OR puppet_ca_proxy_pool_id = #{id}"
     elsif has_feature?('Puppet')
-      conditions[:puppet_proxy_hostname_id] = id
+      conditions[:puppet_proxy_pool_id] = id
     elsif has_feature?('Puppet CA')
-      conditions[:puppet_ca_proxy_hostname_id] = id
+      conditions[:puppet_ca_proxy_pool_id] = id
     end
     conditions
   end

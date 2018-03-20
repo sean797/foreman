@@ -5,23 +5,23 @@ require 'securerandom'
 module HostCommon
   extend ActiveSupport::Concern
   include BelongsToProxies
-  include BelongsToProxySmartProxyPools
+  include BelongsToProxyPools
 
   included do
-    belongs_to_proxy_hostname :puppet_proxy_hostname,
-      :feature => N_('Puppet'),
-      :label => N_('Puppet Master SmartProxyPool'),
-      :description => N_('Use this puppet server as an initial Puppet Server or to execute puppet runs'),
-      :api_description => N_('Puppet proxy hostname ID')
+    belongs_to_proxy_pool :puppet_proxy_pool,
+      :feature => 'Puppet',
+      :label => N_('Puppet Master Pool'),
+      :description => N_('Use this Puppet Proxy Pool as an initial Puppet Server or to execute puppet runs'),
+      :api_description => N_('Puppet Proxy Pool ID')
 
-    belongs_to_proxy_hostname :puppet_ca_proxy_hostname,
+    belongs_to_proxy_pool :puppet_ca_proxy_pool,
       :feature => 'Puppet CA',
-      :label => N_('Puppet CA SmartProxyPool'),
-      :description => N_('Use this puppet server as a CA server'),
-      :api_description => N_('Puppet CA proxy hostname ID')
+      :label => N_('Puppet CA Pool'),
+      :description => N_('Use this Puppet Proxy Pool as a Puppet CA server'),
+      :api_description => N_('Puppet CA Proxy Pool ID')
 
-    has_one :puppet_proxy, :through => :puppet_proxy_hostname, :source => :smart_proxies
-    has_one :puppet_ca_proxy, :through => :puppet_ca_proxy_hostname, :source => :smart_proxies
+    has_one :puppet_proxy, :through => :puppet_proxy_pool, :source => :smart_proxies
+    has_one :puppet_ca_proxy, :through => :puppet_ca_proxy_pool, :source => :smart_proxies
     belongs_to :architecture
     belongs_to :environment
     belongs_to :operatingsystem
@@ -95,18 +95,18 @@ module HostCommon
   end
 
   def puppetca_exists?
-    !!(puppet_ca_proxy_hostname)
+    !!(puppet_ca_proxy_pool)
   end
 
   # no need to store anything in the db if the entry is plain "puppet"
   # If the system is using smart proxies and the user has run the smartproxy:migrate task
   # then the puppetmaster functions handle smart proxy objects
   def puppetmaster
-    puppet_proxy_hostname.to_s
+    puppet_proxy_pool.to_s
   end
 
   def puppet_ca_server
-    puppet_ca_proxy_hostname.to_s
+    puppet_ca_proxy_pool.to_s
   end
 
   # If the host/hostgroup has a medium then use the path from there
@@ -243,9 +243,9 @@ module HostCommon
 
   # fall back to our puppet proxy in case our puppet ca is not defined/used.
   def check_puppet_ca_proxy_is_required?
-    return true if puppet_ca_proxy_hostname_id.present? || puppet_proxy_hostname_id.blank?
+    return true if puppet_ca_proxy_pool_id.present? || puppet_proxy_pool_id.blank?
     if puppet_proxy.has_feature?('Puppet CA')
-      self.puppet_ca_proxy_hostname ||= puppet_proxy_hostname
+      self.puppet_ca_proxy_pool ||= puppet_proxy_pool
     end
   rescue
     true # we don't want to break anything, so just skipping.

@@ -49,7 +49,7 @@ class SmartProxyTest < ActiveSupport::TestCase
 
   # test taxonomix methods
   test "should get used location ids for host" do
-    FactoryBot.create(:host, :with_environment, :puppet_proxy_hostname => hostnames(:puppetmaster),
+    FactoryBot.create(:host, :with_environment, :puppet_proxy_pool => smart_proxy_pools(:puppetmaster),
                        :location => taxonomies(:location1))
     assert_equal ["Puppet", "Puppet CA"], smart_proxies(:puppetmaster).features.pluck(:name).sort
     assert_equal [taxonomies(:location1).id], smart_proxies(:puppetmaster).used_location_ids
@@ -69,7 +69,7 @@ class SmartProxyTest < ActiveSupport::TestCase
 
   test "can count connected hosts" do
     proxy = FactoryBot.create(:puppet_smart_proxy)
-    FactoryBot.create(:host, :with_environment, :puppet_proxy_hostname => proxy.hostnames.first)
+    FactoryBot.create(:host, :with_environment, :puppet_proxy_pool => proxy.pools.first)
     as_admin do
       assert_equal 1, proxy.hosts_count
     end

@@ -72,7 +72,7 @@ module TaxonomiesBaseTest
                          :medium                 => media(:one),
                          :operatingsystem        => operatingsystems(:centos5_3),
                          :owner                  => users(:scoped),
-                         :puppet_proxy_hostname  => hostnames(:puppetmaster),
+                         :puppet_proxy_pool      => smart_proxy_pools(:puppetmaster),
                          :realm                  => realms(:myrealm),
                          :subnet                 => subnet,
                          :"#{opposite_taxonomy}" => nil)
@@ -286,7 +286,7 @@ module TaxonomiesBaseTest
                          :medium           => media(:one),
                          :operatingsystem  => operatingsystems(:centos5_3),
                          :owner            => users(:scoped),
-                         :puppet_proxy_hostname => hostnames(:puppetmaster),
+                         :puppet_proxy_pool => smart_proxy_pools(:puppetmaster),
                          :realm            => realms(:myrealm),
                          :subnet           => subnet)
       FactoryBot.build(:host,

@@ -1,8 +1,8 @@
 module SharedSmartProxiesHelper
-  def smart_proxy_fields(f, hostname = false, options = {})
+  def smart_proxy_fields(f, pool = false, options = {})
     object = options.fetch(:object, f.object)
-    model = hostname ? :hostname : :smart_proxy
-    Foreman::Deprecation.deprecation_warning('1.18', "Hosts should now be assigned a SmartProxyPool, not a SmartProxy, Please update your code to reflect this.") unless hostname
+    model = pool ? :smart_proxy_pool : :smart_proxy
+    Foreman::Deprecation.deprecation_warning('1.18', "Hosts should now be assigned a SmartProxyPool, not a SmartProxy, Please update your code to reflect this.") unless pool
 
     safe_join(object.registered_smart_proxies.map do |proxy_name, proxy_options|
       smart_proxy_select_f(f, proxy_name, options.merge(proxy_options), model)

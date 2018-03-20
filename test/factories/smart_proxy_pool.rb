@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :hostname do
+  factory :smart_proxy_pool do
     sequence(:name) {|n| "SmartProxyPool Name #{n}" }
     sequence(:hostname) {|n| "someurl#{n}.net" }
 

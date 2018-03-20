@@ -342,7 +342,7 @@ Foreman::Application.routes.draw do
           end
           resources :autosign, :only => [:index, :create, :destroy]
         end
-        resources :hostnames, :except => [:new, :edit] do
+        resources :smart_proxy_pools, :except => [:new, :edit] do
           (resources :locations, :only => [:index, :show]) if SETTINGS[:locations_enabled]
           (resources :organizations, :only => [:index, :show]) if SETTINGS[:organizations_enabled]
         end

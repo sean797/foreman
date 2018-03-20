@@ -50,7 +50,7 @@ class Api::V2::ConfigReportsControllerTest < ActionController::TestCase
       proxy = smart_proxies(:puppetmaster)
       as_admin do
         proxy.update_attribute(:url, 'http://configreports.foreman')
-        hostnames(:puppetmaster).update_attribute(:hostname, 'configreports.foreman')
+        smart_proxy_pools(:puppetmaster).update_attribute(:hostname, 'configreports.foreman')
       end
       host = URI.parse(proxy.url).host
       Resolv.any_instance.stubs(:getnames).returns([host])

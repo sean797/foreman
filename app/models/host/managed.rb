@@ -515,7 +515,7 @@ class Host::Managed < Host::Base
   end
 
   def hostgroup_inherited_attributes
-    %w{puppet_proxy_hostname_id puppet_ca_proxy_hostname_id environment_id compute_profile_id realm_id compute_resource_id}
+    %w{puppet_proxy_pool_id puppet_ca_proxy_pool_id environment_id compute_profile_id realm_id compute_resource_id}
   end
 
   def apply_inherited_attributes(attributes, initialized = true)
@@ -598,7 +598,7 @@ class Host::Managed < Host::Base
   end
 
   def puppetrun!
-    unless puppet_proxy_hostname.present?
+    unless puppet_proxy_pool.present?
       errors.add(:base, _("no puppet proxy defined - cant continue"))
       logger.warn "unable to execute puppet run, no puppet proxies defined"
       return false

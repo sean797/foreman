@@ -37,13 +37,13 @@ module Foreman::Controller::SmartProxyAuth
   # Permits registered Smart Proxies or a user with permission
   def require_smart_proxy_or_login(features = nil)
     features = features.call if features.respond_to?(:call)
-    allowed_smart_proxy_hostnames = if features.blank?
+    allowed_smart_proxy_pools = if features.blank?
                                       SmartProxyPool.unscoped.all
                                     else
                                       SmartProxyPool.unscoped.with_features(*features)
                                     end
 
-    if !Setting[:restrict_registered_smart_proxies] || auth_smart_proxy(allowed_smart_proxy_hostnames, Setting[:require_ssl_smart_proxies])
+    if !Setting[:restrict_registered_smart_proxies] || auth_smart_proxy(allowed_smart_proxy_pools, Setting[:require_ssl_smart_proxies])
       set_admin_user
       return true
     end
@@ -58,7 +58,7 @@ module Foreman::Controller::SmartProxyAuth
 
   # Filter requests to only permit from hosts with a registered smart proxy
   # Uses rDNS of the request to match proxy hostnames
-  def auth_smart_proxy(hostnames = SmartProxyPool.unscoped.all, require_cert = true)
+  def auth_smart_proxy(pools = SmartProxyPool.unscoped.all, require_cert = true)
     request_hosts = nil
     if request.ssl?
       # If we have the client certficate in the request environment we can extract the dn and sans from there
@@ -104,10 +104,8 @@ module Foreman::Controller::SmartProxyAuth
     return false unless request_hosts
 
     hosts = []
-    SmartProxy.includes(:pools).unscoped.all.each do |proxy|
-      proxy.pools.each do |pool|
-        hosts += [[ pool.hostname, proxy ]]
-      end
+    pools.each do |pool|
+      hosts += [[ pool.hostname, proxy ]]
     end
     hosts = Hash[hosts]
     allowed_hosts = hosts.keys.push(*Setting[:trusted_hosts])

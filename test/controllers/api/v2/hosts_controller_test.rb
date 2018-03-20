@@ -23,7 +23,7 @@ class Api::V2::HostsControllerTest < ActionController::TestCase
       :medium_id                => media(:one).id,
       :architecture_id          => Architecture.find_by_name('x86_64').id,
       :operatingsystem_id       => Operatingsystem.find_by_name('Redhat').id,
-      :puppet_proxy_hostname_id => hostnames(:puppetmaster).id,
+      :puppet_proxy_pool_id     => smart_proxy_pools(:puppetmaster).id,
       :compute_resource_id      => compute_resources(:one).id,
       :root_pass                => "xybxa6JUkz63w",
       :location_id              => taxonomies(:location1).id,
@@ -589,7 +589,7 @@ class Api::V2::HostsControllerTest < ActionController::TestCase
     Setting[:require_ssl_smart_proxies] = false
 
     host = 'factsimporter.foreman'
-    as_admin { proxy.hostnames.first.update_attribute(:hostname, host) }
+    as_admin { proxy.pools.first.update_attribute(:hostname, host) }
     Resolv.any_instance.stubs(:getnames).returns([host])
     hostname = fact_json['name']
     facts    = fact_json['facts']

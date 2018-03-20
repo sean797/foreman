@@ -3,7 +3,7 @@ module Foreman::Controller::Parameters::SmartProxyPool
   include Foreman::Controller::Parameters::Taxonomix
 
   class_methods do
-    def hostname_params_filter
+    def smart_proxy_pool_params_filter
       Foreman::ParameterFilter.new(::SmartProxyPool).tap do |filter|
         filter.permit :name,
           :hostname,
@@ -13,7 +13,7 @@ module Foreman::Controller::Parameters::SmartProxyPool
     end
   end
 
-  def hostname_params
-    self.class.hostname_params_filter.filter_params(params, parameter_filter_context)
+  def smart_proxy_pool_params
+    self.class.smart_proxy_pool_params_filter.filter_params(params, parameter_filter_context)
   end
 end

@@ -8,6 +8,6 @@ child :features do
   attributes :name, :id, :url
 end
 
-child :hostnames do
-  extends "api/v2/smart_proxies/hostnames"
+child :pools do
+  extends "api/v2/smart_proxies/pools"
 end

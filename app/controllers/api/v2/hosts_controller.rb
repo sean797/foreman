@@ -17,7 +17,7 @@ module Api
       before_action :find_resource, :except => [:index, :create, :facts]
       check_permissions_for %w{power boot}
       before_action :process_parameter_attributes, :only => %w{update}
-      before_action :swap_proxy_for_hostname, :only => %w{create update}
+      before_action :swap_proxy_for_pool, :only => %w{create update}
 
       add_smart_proxy_filters :facts, :features => Proc.new { FactImporter.fact_features }
 
@@ -413,13 +413,13 @@ Return the host's compute attributes that can be used to create a clone of this 
         ).host
       end
 
-      def swap_proxy_for_hostname
-        ca_proxy_hostname = SmartProxy.find_by_id(host_params[:puppet_ca_proxy_id]).try(:hostnames).try(:first)
-        puppet_proxy_hostname = SmartProxy.find_by_id(host_params[:puppet_proxy_id]).try(:hostnames).try(:first)
-        Foreman::Deprecation.api_deprecation_warning('puppet_ca_proxy_id parameter is deprecated, please use the new puppet_ca_proxy_hostname_id parameter instead') if ca_proxy_hostname
-        Foreman::Deprecation.api_deprecation_warning('puppet_proxy_id parameter is deprecated, please use the new puppet_proxy_hostname_id parameter instead') if puppet_proxy_hostname
-        @host_params = host_params.merge(puppet_proxy_hostname_id: puppet_proxy_hostname.try(:id)).
-                                  merge(puppet_ca_proxy_hostname_id: ca_proxy_hostname.try(:id)).
+      def swap_proxy_for_pool
+        ca_proxy_pool = SmartProxy.find_by_id(host_params[:puppet_ca_proxy_id]).try(:pools).try(:first)
+        puppet_proxy_pool = SmartProxy.find_by_id(host_params[:puppet_proxy_id]).try(:pools).try(:first)
+        Foreman::Deprecation.api_deprecation_warning('puppet_ca_proxy_id parameter is deprecated, please use the new puppet_ca_proxy_pool_id parameter instead') if ca_proxy_pool
+        Foreman::Deprecation.api_deprecation_warning('puppet_proxy_id parameter is deprecated, please use the new puppet_proxy_pool_id parameter instead') if puppet_proxy_pool
+        @host_params = host_params.merge(puppet_proxy_pool_id: puppet_proxy_pool.try(:id)).
+                                  merge(puppet_ca_proxy_pool_id: ca_proxy_pool.try(:id)).
                                   except(:puppet_ca_proxy_id, :puppet_proxy_id)
       end
     end

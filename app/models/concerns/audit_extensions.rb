@@ -16,7 +16,7 @@ module AuditExtensions
         :config_group => 'ConfigGroup',
         :domain => 'Domain',
         :host => 'Host::Base',
-        :hostname => 'SmartProxyPool',
+        :smart_proxy_pool => 'SmartProxyPool',
         :hostgroup => 'Hostgroup',
         :image => 'Image',
         :interface => 'Nic::Base',

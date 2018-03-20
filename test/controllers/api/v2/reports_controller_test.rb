@@ -55,7 +55,7 @@ class Api::V2::ReportsControllerTest < ActionController::TestCase
       proxy = smart_proxies(:puppetmaster)
       host = 'configreports.foreman'
       as_admin { proxy.update_attribute(:url, "http://#{host}") }
-      as_admin { proxy.hostnames.first.update_attribute(:hostname, host) }
+      as_admin { proxy.pools.first.update_attribute(:hostname, host) }
       host = URI.parse(proxy.url).host
       Resolv.any_instance.stubs(:getnames).returns([host])
       post :create, params: { :report => create_a_puppet_transaction_report }
