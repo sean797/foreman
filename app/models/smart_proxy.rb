@@ -117,7 +117,10 @@ class SmartProxy < ApplicationRecord
   end
 
   def create_pool
-    self.pools << SmartProxyPool.create_with(name: self.name).find_or_initialize_by(hostname: self.hostname)
+    spp = SmartProxyPool.create_with(name: self.name).find_or_initialize_by(hostname: self.hostname)
+    self.pools << spp
+    spp.locations = self.locations if SETTINGS[:locations_enabled]
+    spp.organizations = self.organizations if SETTINGS[:organizations_enabled]
   end
 
   def associate_features

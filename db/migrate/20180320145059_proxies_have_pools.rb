@@ -13,9 +13,24 @@ class ProxiesHavePools < ActiveRecord::Migration[5.0]
 
     User.without_auditing do
       SmartProxy.unscoped.each do |proxy|
-        proxy.pools << SmartProxyPool.new(:name => proxy.name, :hostname => proxy.hostname)
+        spp = SmartProxyPool.new(name: proxy.name, hostname: proxy.hostname).save(:validate => false)
+        puts 'WWW'
+        puts spp
+        puts 'WWW'
+        proxy.pools = [spp]
+        puts proxy.errors.inspect 
+        puts 'AAA'
+        spp.locations = proxy.locations if SETTINGS[:locations_enabled]
+        spp.organizations = proxy.organizations if SETTINGS[:organizations_enabled]
       end
     end
+
+
+    puts SmartProxy.unscoped.first.inspect
+    puts SmartProxy.unscoped.first.pools.inspect
+    puts 'SSSS'
+    puts SmartProxyPool.unscoped.first.inspect
+    puts SmartProxyPool.unscoped.first.smart_proxies.inspect
 
     add_column :hosts, :puppet_ca_proxy_pool_id, :integer
     add_column :hosts, :puppet_proxy_pool_id, :integer
@@ -62,10 +77,10 @@ class ProxiesHavePools < ActiveRecord::Migration[5.0]
     add_column :hosts, :puppet_proxy_id, :integer
     Host.unscoped.each do |host|
       if host.puppet_ca_proxy_pool_id
-        host.puppet_ca_proxy_id = SmartProxy.unscoped.joins(:smart_proxy_pools).where(smart_proxy_pools: { id: host.puppet_ca_proxy_pool_id }).try(:first).try(:id)
+        host.puppet_ca_proxy_id = SmartProxy.unscoped.joins(:pools).where(smart_proxy_pools: { id: host.puppet_ca_proxy_pool_id }).try(:first).try(:id)
       end
       if host.puppet_proxy_pool_id
-        host.puppet_proxy_id = SmartProxy.unscoped.joins(:smart_proxy_pools).where(smart_proxy_pools: { id: host.puppet_proxy_pool_id }).try(:first).try(:id)
+        host.puppet_proxy_id = SmartProxy.unscoped.joins(:pools).where(smart_proxy_pools: { id: host.puppet_proxy_pool_id }).try(:first).try(:id)
       end
       host.save(:validate => false)
     end
